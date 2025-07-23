@@ -3,10 +3,12 @@ import { getDb } from '@/lib/mongodb'
 import { ObjectId } from 'mongodb'
 
 // PUT update event
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, context: { params: { id: string } } | { params: Promise<{ id: string }> }) {
   try {
-    const eventData = await request.json()
+    // Await params if it's a Promise (Next.js dynamic API route requirement)
+    const params = 'then' in context.params ? await context.params : context.params
     const eventId = params.id
+    const eventData = await request.json()
 
     // Validate required fields
     if (!eventData.title || !eventData.description || !eventData.date || !eventData.location) {
@@ -51,8 +53,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 // DELETE event
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, context: { params: { id: string } } | { params: Promise<{ id: string }> }) {
   try {
+    // Await params if it's a Promise (Next.js dynamic API route requirement)
+    const params = 'then' in context.params ? await context.params : context.params
     const eventId = params.id
     const db = await getDb()
     const result = await db.collection('events').deleteOne({ _id: new ObjectId(eventId) })
