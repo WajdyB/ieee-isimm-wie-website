@@ -187,7 +187,7 @@ export default function HomePage() {
             ) : recentEvents.length > 0 ? (
               recentEvents.map((event, index) => (
                 <div
-                  key={event._id}
+                  key={event.id}
                   className="w-full max-w-sm bg-white rounded-xl shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300 animate-on-scroll"
                   style={{ 
                     display: 'block', 

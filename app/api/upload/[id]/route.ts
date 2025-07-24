@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getDb } from '@/lib/mongodb'
 import { GridFSBucket, ObjectId } from 'mongodb'
 
-type Context = { params: { id: string } } | { params: Promise<{ id: string }> }
+type Context = { params: Promise<{ id: string }> }
 
 export async function GET(request: NextRequest, context: Context) {
   try {
