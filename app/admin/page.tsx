@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Plus, Edit, Trash2, Upload, Eye, EyeOff, Loader2 } from "lucide-react"
 import Image from "next/image"
-import { loginAdmin, getEvents, createEvent, updateEvent, deleteEvent, uploadImages, type EventData } from "@/lib/api"
+import { loginAdmin, getEvents, createEvent, deleteEvent, uploadImages, type EventData } from "@/lib/api"
 
 // Add local Event type for MongoDB
 interface Event {
@@ -31,7 +31,6 @@ export default function AdminPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [events, setEvents] = useState<Event[]>([])
-  const [editingEvent, setEditingEvent] = useState<Event | null>(null)
   const [newEvent, setNewEvent] = useState<EventData>({
     title: "",
     description: "",
@@ -126,44 +125,6 @@ export default function AdminPage() {
     }
   }
 
-  const handleEditEvent = (event: Event) => {
-    setEditingEvent(event)
-  }
-
-  const handleUpdateEvent = async () => {
-    if (!editingEvent) return
-
-    if (!editingEvent.title || !editingEvent.description || !editingEvent.date || !editingEvent.location) {
-      alert("Please fill in all required fields")
-      return
-    }
-
-    try {
-      setLoading(true)
-      const response = await updateEvent(editingEvent._id, {
-        title: editingEvent.title,
-        description: editingEvent.description,
-        date: editingEvent.date,
-        location: editingEvent.location,
-        attendees: editingEvent.attendees,
-        images: editingEvent.images,
-      })
-      
-      if (response.success) {
-        setEvents(events.map((e) => (e._id === editingEvent._id ? response.data : e)))
-        setEditingEvent(null)
-        alert("Event updated successfully!")
-      } else {
-        alert(response.message || "Failed to update event")
-      }
-    } catch (error) {
-      console.error('Error updating event:', error)
-      alert("Failed to update event. Please try again.")
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const handleDeleteEvent = async (id: string) => {
     if (!confirm("Are you sure you want to delete this event?")) {
       return
@@ -203,17 +164,10 @@ export default function AdminPage() {
         // Extract URLs from the response
         const uploadedUrls = uploadResponse.files.map((file: { url: string; path: string }) => file.url)
         
-        if (isEditing && editingEvent) {
-          setEditingEvent({
-            ...editingEvent,
-            images: [...(editingEvent.images || []), ...uploadedUrls],
-          })
-        } else {
-          setNewEvent({
-            ...newEvent,
-            images: [...(newEvent.images || []), ...uploadedUrls],
-          })
-        }
+        setNewEvent({
+          ...newEvent,
+          images: [...(newEvent.images || []), ...uploadedUrls],
+        })
       } else {
         alert('Failed to upload images: ' + uploadResponse.message)
       }
@@ -225,18 +179,11 @@ export default function AdminPage() {
     }
   }
 
-  const removeImage = (index: number, isEditing = false) => {
-    if (isEditing && editingEvent) {
-      setEditingEvent({
-        ...editingEvent,
-        images: (editingEvent.images || []).filter((_, i) => i !== index),
-      })
-    } else {
-      setNewEvent({
-        ...newEvent,
-        images: (newEvent.images || []).filter((_, i) => i !== index),
-      })
-    }
+  const removeImage = (index: number) => {
+    setNewEvent({
+      ...newEvent,
+      images: (newEvent.images || []).filter((_, i) => i !== index),
+    })
   }
 
   if (!isAuthenticated) {
@@ -287,9 +234,6 @@ export default function AdminPage() {
               {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Login
             </Button>
-            <p className="text-sm text-gray-500 text-center">
-              Demo credentials: admin@wie-isimm.org / admin123
-            </p>
           </CardContent>
         </Card>
       </div>
@@ -332,9 +276,6 @@ export default function AdminPage() {
                         </div>
                       </div>
                       <div className="flex space-x-2">
-                        <Button onClick={() => handleEditEvent(event)} size="sm" variant="outline">
-                          <Edit className="h-4 w-4" />
-                        </Button>
                         <Button onClick={() => handleDeleteEvent(event._id)} size="sm" variant="destructive">
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -344,101 +285,6 @@ export default function AdminPage() {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Edit Event Modal */}
-            {editingEvent && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Edit Event</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-title">Title</Label>
-                    <Input
-                      id="edit-title"
-                      value={editingEvent.title}
-                      onChange={(e) => setEditingEvent({ ...editingEvent, title: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-description">Description</Label>
-                    <Textarea
-                      id="edit-description"
-                      value={editingEvent.description}
-                      onChange={(e) => setEditingEvent({ ...editingEvent, description: e.target.value })}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="edit-date">Date</Label>
-                      <Input
-                        id="edit-date"
-                        type="date"
-                        value={editingEvent.date}
-                        onChange={(e) => setEditingEvent({ ...editingEvent, date: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="edit-location">Location</Label>
-                      <Input
-                        id="edit-location"
-                        value={editingEvent.location}
-                        onChange={(e) => setEditingEvent({ ...editingEvent, location: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-attendees">Number of Attendees</Label>
-                    <Input
-                      id="edit-attendees"
-                      type="number"
-                      value={editingEvent.attendees}
-                      onChange={(e) =>
-                        setEditingEvent({ ...editingEvent, attendees: Number.parseInt(e.target.value) || 0 })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Images</Label>
-                    <div className="grid grid-cols-3 gap-4 mb-4">
-                      {editingEvent.images.map((image, index) => (
-                        <div key={index} className="relative">
-                          <Image
-                            src={image || "/placeholder.svg"}
-                            alt={`Event image ${index + 1}`}
-                            width={200}
-                            height={150}
-                            className="w-full h-24 object-cover rounded"
-                          />
-                          <Button
-                            onClick={() => removeImage(index, true)}
-                            size="sm"
-                            variant="destructive"
-                            className="absolute top-1 right-1 h-6 w-6 p-0"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                    <Input
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      onChange={(e) => handleImageUpload(e.target.files, true)}
-                      disabled={loading}
-                    />
-                    {loading && <p className="text-sm text-purple-600">Uploading images...</p>}
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button onClick={handleUpdateEvent}>Update Event</Button>
-                    <Button onClick={() => setEditingEvent(null)} variant="outline">
-                      Cancel
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
           </TabsContent>
 
           <TabsContent value="add-event">

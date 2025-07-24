@@ -69,18 +69,6 @@ export async function createEvent(eventData: EventData) {
   return response.json()
 }
 
-export async function updateEvent(id: string, eventData: EventData) {
-  const response = await fetch(`/api/events/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(eventData),
-  })
-
-  return response.json()
-}
-
 export async function deleteEvent(id: string) {
   const response = await fetch(`/api/events/${id}`, {
     method: 'DELETE',

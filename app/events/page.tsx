@@ -6,7 +6,7 @@ import { Calendar, MapPin, Users, X, ChevronLeft, ChevronRight, Loader2 } from "
 import { Button } from "@/components/ui/button"
 
 interface Event {
-  id: number
+  _id: string
   title: string
   description: string
   date: string
@@ -166,7 +166,7 @@ export default function EventsPage() {
                 console.log('Rendering event:', event.title, 'at index:', index)
                 return (
                   <div
-                    key={event.id}
+                    key={event._id}
                     className="bg-white rounded-xl shadow-lg overflow-hidden group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer"
                     onClick={() => openLightbox(event)}
                   >
