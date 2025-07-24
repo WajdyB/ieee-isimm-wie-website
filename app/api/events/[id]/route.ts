@@ -11,26 +11,30 @@ interface EventData {
   images?: string[]
 }
 
-type Context = { params: { id: string } } | { params: Promise<{ id: string }> }
-
-export async function DELETE(request: NextRequest, context: Context) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const params = 'then' in context.params ? await context.params : context.params;
     const eventId = params.id;
+
     if (!ObjectId.isValid(eventId)) {
       return NextResponse.json(
         { success: false, message: 'Invalid event ID' },
         { status: 400 }
       );
     }
+
     const db = await getDb();
     const result = await db.collection('events').deleteOne({ _id: new ObjectId(eventId) });
+
     if (result.deletedCount === 0) {
       return NextResponse.json(
         { success: false, message: 'Event not found' },
         { status: 404 }
       );
     }
+
     return NextResponse.json({
       success: true,
       message: 'Event deleted successfully',
