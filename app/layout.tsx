@@ -10,7 +10,9 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "WIE ISIMM - Women in Engineering",
   description: "IEEE ISIMM Student Branch - Women in Engineering Affinity Group",
-    generator: 'v0.dev'
+  icons: {
+    icon: "/favicon-wie.ico"
+  }
 }
 
 export default function RootLayout({
