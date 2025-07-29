@@ -176,7 +176,7 @@ export default function EventsPage() {
                         alt={event.title}
                         width={400}
                         height={250}
-                        className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
+                        className="w-full h-48 object-contain group-hover:scale-110 transition-transform duration-300"
                         onError={(e) => {
                           // Fallback to placeholder if image fails to load
                           const target = e.target as HTMLImageElement
@@ -221,13 +221,13 @@ export default function EventsPage() {
       {/* Lightbox Modal */}
       {selectedEvent && (
         <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4">
-          <div className="relative max-w-4xl w-full max-h-[90vh] bg-white rounded-xl overflow-hidden">
+          <div className="relative max-w-4xl w-full max-h-[90vh] bg-white rounded-xl overflow-hidden flex flex-col">
             {/* Close Button */}
             <button
               onClick={closeLightbox}
-              className="absolute top-4 right-4 z-10 bg-white/20 backdrop-blur-sm p-2 rounded-full hover:bg-white/30 transition-colors duration-200"
+              className="absolute top-4 right-4 z-10 bg-gray-400/80 backdrop-blur-sm p-2 rounded-full hover:bg-gray-300/80 transition-colors duration-200"
             >
-              <X className="h-6 w-6 text-white" />
+              <X className="h-6 w-6 text-gray-800" />
             </button>
 
             {/* Image Navigation */}
@@ -235,26 +235,26 @@ export default function EventsPage() {
               <>
                 <button
                   onClick={prevImage}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/20 backdrop-blur-sm p-2 rounded-full hover:bg-white/30 transition-colors duration-200"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-gray-400/80 backdrop-blur-sm p-2 rounded-full hover:bg-gray-300/80 transition-colors duration-200"
                 >
-                  <ChevronLeft className="h-6 w-6 text-white" />
+                  <ChevronLeft className="h-6 w-6 text-gray-800" />
                 </button>
                 <button
                   onClick={nextImage}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/20 backdrop-blur-sm p-2 rounded-full hover:bg-white/30 transition-colors duration-200"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-gray-400/80 backdrop-blur-sm p-2 rounded-full hover:bg-gray-300/80 transition-colors duration-200"
                 >
-                  <ChevronRight className="h-6 w-6 text-white" />
+                  <ChevronRight className="h-6 w-6 text-gray-800" />
                 </button>
               </>
             )}
 
-            {/* Main Image */}
-            <div className="relative h-96">
+            {/* Fixed Image Section */}
+            <div className="relative h-96 flex-shrink-0">
               <Image
                 src={selectedEvent.images && selectedEvent.images.length > 0 ? selectedEvent.images[currentImageIndex] : "/placeholder.svg"}
                 alt={selectedEvent.title}
                 fill
-                className="object-cover"
+                className="object-contain"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement
                   target.src = "/placeholder.svg"
@@ -262,53 +262,55 @@ export default function EventsPage() {
               />
             </div>
 
-            {/* Event Details */}
-            <div className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">{selectedEvent.title}</h2>
-              <p className="text-gray-600 mb-4">{selectedEvent.description}</p>
-              <div className="grid md:grid-cols-3 gap-4 text-sm">
-                <div className="flex items-center">
-                  <Calendar className="h-4 w-4 mr-2 text-purple-600" />
-                  {formatDate(selectedEvent.date)}
-                </div>
-                <div className="flex items-center">
-                  <MapPin className="h-4 w-4 mr-2 text-purple-600" />
-                  {selectedEvent.location}
-                </div>
-                <div className="flex items-center">
-                  <Users className="h-4 w-4 mr-2 text-purple-600" />
-                  {selectedEvent.attendees} attendees
-                </div>
-              </div>
-
-              {/* Image Thumbnails */}
-              {selectedEvent.images && selectedEvent.images.length > 1 && (
-                <div className="mt-6">
-                  <div className="flex space-x-2 overflow-x-auto pb-2">
-                    {selectedEvent.images.map((image, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setCurrentImageIndex(index)}
-                        className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors duration-200 ${
-                          index === currentImageIndex ? "border-purple-600" : "border-transparent"
-                        }`}
-                      >
-                        <Image
-                          src={image || "/placeholder.svg"}
-                          alt={`${selectedEvent.title} ${index + 1}`}
-                          width={64}
-                          height={64}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement
-                            target.src = "/placeholder.svg"
-                          }}
-                        />
-                      </button>
-                    ))}
+            {/* Scrollable Content Section */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="p-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-3">{selectedEvent.title}</h2>
+                <p className="text-gray-600 mb-4 leading-relaxed">{selectedEvent.description}</p>
+                <div className="grid md:grid-cols-3 gap-4 text-sm">
+                  <div className="flex items-center">
+                    <Calendar className="h-4 w-4 mr-2 text-purple-600" />
+                    {formatDate(selectedEvent.date)}
+                  </div>
+                  <div className="flex items-center">
+                    <MapPin className="h-4 w-4 mr-2 text-purple-600" />
+                    {selectedEvent.location}
+                  </div>
+                  <div className="flex items-center">
+                    <Users className="h-4 w-4 mr-2 text-purple-600" />
+                    {selectedEvent.attendees} attendees
                   </div>
                 </div>
-              )}
+
+                {/* Image Thumbnails */}
+                {selectedEvent.images && selectedEvent.images.length > 1 && (
+                  <div className="mt-6">
+                    <div className="flex space-x-2 overflow-x-auto pb-2">
+                      {selectedEvent.images.map((image, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setCurrentImageIndex(index)}
+                          className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors duration-200 ${
+                            index === currentImageIndex ? "border-purple-600" : "border-transparent"
+                          }`}
+                        >
+                          <Image
+                            src={image || "/placeholder.svg"}
+                            alt={`${selectedEvent.title} ${index + 1}`}
+                            width={64}
+                            height={64}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement
+                              target.src = "/placeholder.svg"
+                            }}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

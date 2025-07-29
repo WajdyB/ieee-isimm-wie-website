@@ -203,7 +203,7 @@ export default function HomePage() {
                       alt={event.title}
                       width={400}
                       height={300}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-48 object-contain group-hover:scale-105 transition-transform duration-300"
                     />
                     <div className="absolute inset-0 bg-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </div>
