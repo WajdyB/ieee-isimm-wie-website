@@ -12,89 +12,132 @@ export const aboutImages = {
   // Photo Gallery images - you can add up to 12 images
   gallery: [
     {
-      src: "/images/placeholder.jpg", // Event/Activity 1
-      alt: "WIE ISIMM Event 1",
-      title: "Event 1",
+      src: "/images/events/self-kowledge.png", // Event/Activity 1
+      alt: "Self Knowledge Workshop",
+      title: "Self Knowledge Workshop",
       width: 300,
       height: 300,
     },
     {
-      src: "/images/placeholder.jpg", // Event/Activity 2
-      alt: "WIE ISIMM Event 2", 
-      title: "Event 2",
+      src: "/images/events/breast-cancer.jpg", // Event/Activity 2
+      alt: "Breast Cancer Awareness", 
+      title: "Breast Cancer Awareness",
       width: 300,
       height: 300,
     },
     {
-      src: "/images/placeholder.jpg", // Event/Activity 3
-      alt: "WIE ISIMM Event 3",
-      title: "Event 3",
+      src: "/images/events/think-like-a-programmer.jpg", // Event/Activity 3
+      alt: "Think like a programmer",
+      title: "Think like a programmer",
       width: 300,
       height: 300,
     },
     {
-      src: "/images/placeholder.jpg", // Event/Activity 4
-      alt: "WIE ISIMM Event 4",
-      title: "Event 4",
+      src: "/images/events/wie-heal-1.jpg", // Event/Activity 4
+      alt: "WIE HEAL 1.0",
+      title: "WIE HEAL 1.0",
       width: 300,
       height: 300,
     },
     {
-      src: "/images/placeholder.jpg", // Event/Activity 5
-      alt: "WIE ISIMM Event 5",
-      title: "Event 5",
+      src: "/images/events/wie-care-and-share.jpg", // Event/Activity 5
+      alt: "WIE Care and Share",
+      title: "WIE Care and Share",
       width: 300,
       height: 300,
     },
     {
-      src: "/images/placeholder.jpg", // Event/Activity 6
-      alt: "WIE ISIMM Event 6",
-      title: "Event 6",
+      src: "/images/events/ui-ux-design-workshop-1.jpg", // Event/Activity 6
+      alt: "UI/UX Design Workshop",
+      title: "UI/UX Design Workshop",
       width: 300,
       height: 300,
     },
     {
-      src: "/images/placeholder.jpg", // Event/Activity 7
-      alt: "WIE ISIMM Event 7",
-      title: "Event 7",
+      src: "/images/events/wie-empower-her.jpg", // Event/Activity 7
+      alt: "WIE Empower Her",
+      title: "WIE Empower Her",
       width: 300,
       height: 300,
     },
     {
-      src: "/images/placeholder.jpg", // Event/Activity 8
-      alt: "WIE ISIMM Event 8",
-      title: "Event 8",
+      src: "/images/events/her-brilliance-our-future.jpg", // Event/Activity 8
+      alt: "Her Brilliance Our Future",
+      title: "Her Brilliance Our Future",
       width: 300,
       height: 300,
     },
     {
-      src: "/images/placeholder.jpg", // Event/Activity 9
-      alt: "WIE ISIMM Event 9",
-      title: "Event 9",
+      src: "/images/events/stress-management.jpg", // Event/Activity 9
+      alt: "Stress Management",
+      title: "Stress Management",
       width: 300,
       height: 300,
     },
     {
-      src: "/images/placeholder.jpg", // Event/Activity 10
-      alt: "WIE ISIMM Event 10",
-      title: "Event 10",
+      src: "/images/events/ai-pulse.jpg", // Event/Activity 10
+      alt: "AI Pulse",
+      title: "AI Pulse",
       width: 300,
       height: 300,
     },
     {
-      src: "/images/placeholder.jpg", // Event/Activity 11
-      alt: "WIE ISIMM Event 11",
-      title: "Event 11",
+      src: "/images/events/ui-ux-design-workshop-2.jpg", // Event/Activity 11
+      alt: "UI/UX Design Workshop",
+      title: "UI/UX Design Workshop",
       width: 300,
       height: 300,
     },
     {
-      src: "/images/placeholder.jpg", // Event/Activity 12
-      alt: "WIE ISIMM Event 12",
-      title: "Event 12",
+      src: "/images/events/crafting-your-speech.jpg", // Event/Activity 12
+      alt: "Crafting Your Speech",
+      title: "Crafting Your Speech",
       width: 300,
       height: 300,
     },
+    {
+      src: "/images/events/wie-guide.jpg", // Event/Activity 13
+      alt: "WIE Guide",
+      title: "WIE Guide",
+      width: 300,
+      height: 300,
+    },
+    {
+      src: "/images/events/wie-care-and-share-2.jpg", // Event/Activity 14
+      alt: "WIE Care and Share 2.0",
+      title: "WIE Care and Share 2.0",
+      width: 300,
+      height: 300,
+    },
+    {
+      src: "/images/events/wie-heal-3.0.jpg", // Event/Activity 15
+      alt: "WIE HEAL 3.0",
+      title: "WIE HEAL 3.0",
+      width: 300,
+      height: 300,
+    },
+    {
+      src: "/images/events/coffee-talk.jpg", // Event/Activity 16
+      alt: "Coffee Talk",
+      title: "Coffee Talk",
+      width: 300,
+      height: 300,
+    },
+    {
+      src: "/images/events/wie-lead.jpg", // Event/Activity 17
+      alt: "WIE LEAD",
+      title: "WIE LEAD",
+      width: 300,
+      height: 300,
+    },
+    {
+      src: "/images/events/takwiera.jpg", // Event/Activity 18
+      alt: "TAKWIERA",
+      title: "TAKWIERA",
+      width: 300,
+      height: 300,
+    },
+    
   ],
 } as const
 
@@ -145,48 +188,48 @@ export const committeeImages = {
     {
       name: "Dorra Barbria",
       position: "Chairwoman",
-      image: "/images/committee/dorra_barbria.png", // You'll add this image
+      image: "/images/committee/dorra_barbria.png", 
       facebook: "https://facebook.com/dorra.barbria",
-      email: "dorra@wie-isimm.org",
-      linkedin: "https://linkedin.com/in/dorra-barbria",
+      email: "dbarbria@gmail.com",
+      linkedin: "https://www.linkedin.com/in/dorra-barbria-254947280/",
     },
     {
       name: "Chifa Guesmi",
       position: "Vice Chair",
-      image: "/images/committee/chifa_guesmi.jpeg", // You'll add this image
-      facebook: "https://facebook.com/chifa.guesmi",
-      email: "chifa@wie-isimm.org",
-      linkedin: "https://linkedin.com/in/chifa-guesmi",
+      image: "/images/committee/chifa_guesmi.jpeg", 
+      facebook: "https://www.facebook.com/chifa.guesmy",
+      email: "chifaguesmi@ieee.org",
+      linkedin: "https://www.linkedin.com/in/chifa-guesmi-7ab213284/",
     },
     {
       name: "Maryem Teborbi",
       position: "Secretary",
-      image: "/images/committee/maryem_teborbi.png", // You'll add this image
-      facebook: "https://facebook.com/maryem.teborbi",
-      email: "maryem@wie-isimm.org",
-      linkedin: "https://linkedin.com/in/maryem-teborbi",
+      image: "/images/committee/maryem_teborbi.png", 
+      facebook: "https://www.facebook.com/maryem.teborbi",
+      email: "maryemteborbi0@ieee.org",
+      linkedin: "https://www.linkedin.com/in/maryem-teborbi-a06b79300/",
     },
     {
       name: "Miniar Guizani",
       position: "Treasurer",
-      image: "/images/committee/miniar_guizani.png", // You'll add this image
-      facebook: "https://facebook.com/miniar.guizani",
-      email: "miniar@wie-isimm.org",
-      linkedin: "https://linkedin.com/in/miniar-guizani",
+      image: "/images/committee/miniar_guizani.png", 
+      facebook: "https://www.facebook.com/miniar.guizani",
+      email: "miniarguizeni@gmail.com",
+      linkedin: "https://www.linkedin.com/in/miniar-guizeni-5b1841377/",
     },
     {
       name: "Malek Aarfaoui",
       position: "Webmaster",
-      image: "/images/committee/malek_aarfaoui.png", // You'll add this image
-      facebook: "https://facebook.com/malek.aarfaoui",
-      email: "malek@wie-isimm.org",
-      linkedin: "https://linkedin.com/in/malek-aarfaoui",
+      image: "/images/committee/malek_aarfaoui.png", 
+      facebook: "https://www.facebook.com/malek.arfaoui.792",
+      email: "arfaoui.malek04@icloud.com",
+      linkedin: "https://www.linkedin.com/in/arfaoui-malek-9518652a1/",
     },
   ],
   
   // Chairwoman photo for leadership message section
   chair: {
-    src: "/images/committee/dorra_barbria.png", // Same as chairwoman's main photo
+    src: "/images/committee/dorra_barbria.png", 
     alt: "Dorra Barbria - Chairwoman",
     width: 80,
     height: 80,

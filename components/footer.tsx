@@ -8,21 +8,15 @@ const Footer = () => {
   const socialLinks = [
     {
       name: "Facebook",
-      href: "https://facebook.com/wieisimm",
+      href: "https://www.facebook.com/IEEEWIEISIMMSA",
       icon: Facebook,
       color: "hover:text-blue-600",
     },
     {
       name: "Instagram",
-      href: "https://instagram.com/wieisimm",
+      href: "https://www.instagram.com/ieee_wie_isimm_sag/?hl=fr",
       icon: Instagram,
       color: "hover:text-pink-600",
-    },
-    {
-      name: "LinkedIn",
-      href: "https://linkedin.com/company/wieisimm",
-      icon: Linkedin,
-      color: "hover:text-blue-700",
     },
     {
       name: "Email",

@@ -9,6 +9,9 @@ export default function AboutPage() {
   const observerRef = useRef<IntersectionObserver | null>(null)
   const galleryImages = getGalleryImages()
 
+  // Debug: Log the number of images loaded
+  console.log('Gallery images loaded:', galleryImages.length)
+
   useEffect(() => {
     observerRef.current = new IntersectionObserver(
       (entries) => {
@@ -149,16 +152,17 @@ export default function AboutPage() {
           <div className="text-center mb-16 animate-on-scroll">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Our Journey in Pictures</h2>
             <p className="text-xl text-gray-600">Moments that define our community and achievements</p>
+            <p className="text-sm text-gray-500 mt-2">Showing {galleryImages.length} images</p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
             {galleryImages.map((image, index) => (
-              <div key={index} className="relative group overflow-hidden rounded-lg animate-on-scroll">
+              <div key={index} className="relative group overflow-hidden rounded-lg animate-on-scroll bg-gray-100">
                 <Image
                   src={image.src}
                   alt={image.alt}
                   width={image.width}
                   height={image.height}
-                  className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
+                  className="w-full h-48 object-contain group-hover:scale-110 transition-transform duration-300"
                 />
                 <div className="absolute inset-0 bg-purple-600/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                   <div className="text-white text-center">
