@@ -14,6 +14,33 @@ export interface EventData {
   images?: string[] // URLs returned from /api/upload, now served from MongoDB GridFS
 }
 
+export interface ExcomMemberData {
+  name: string
+  position: string
+  image?: string
+  facebook?: string
+  email?: string
+  linkedin?: string
+  rank?: number
+}
+
+export interface ExcomMember extends ExcomMemberData {
+  _id: string
+  created_at?: string
+  updated_at?: string
+}
+
+export interface ExcomMandate {
+  _id: string
+  name: string
+  startYear?: number | null
+  endYear?: number | null
+  isCurrent?: boolean
+  members?: ExcomMember[]
+  created_at?: string
+  updated_at?: string
+}
+
 // Authentication
 export async function loginAdmin(credentials: LoginCredentials) {
   const response = await fetch('/api/auth/login', {
@@ -76,3 +103,91 @@ export async function deleteEvent(id: string) {
 
   return response.json()
 } 
+
+// Executive Committee API
+export async function getExcomMandates() {
+  const response = await fetch("/api/excom/mandates")
+  const data = await response.json()
+  return data
+}
+
+export async function createExcomMandate(mandate: {
+  name: string
+  startYear?: number
+  endYear?: number
+  isCurrent?: boolean
+}) {
+  const response = await fetch("/api/excom/mandates", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(mandate),
+  })
+
+  return response.json()
+}
+
+export async function addExcomMember(mandateId: string, member: ExcomMemberData) {
+  const response = await fetch(`/api/excom/mandates/${mandateId}/members`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(member),
+  })
+
+  return response.json()
+}
+
+export async function updateExcomMandate(
+  id: string,
+  updates: Partial<{
+    name: string
+    startYear?: number | null
+    endYear?: number | null
+    isCurrent?: boolean
+  }>,
+) {
+  const response = await fetch(`/api/excom/mandates/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(updates),
+  })
+
+  return response.json()
+}
+
+export async function deleteExcomMandate(id: string) {
+  const response = await fetch(`/api/excom/mandates/${id}`, {
+    method: "DELETE",
+  })
+
+  return response.json()
+}
+
+export async function updateExcomMember(
+  mandateId: string,
+  memberId: string,
+  updates: Partial<ExcomMemberData>,
+) {
+  const response = await fetch(`/api/excom/mandates/${mandateId}/members/${memberId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(updates),
+  })
+
+  return response.json()
+}
+
+export async function deleteExcomMember(mandateId: string, memberId: string) {
+  const response = await fetch(`/api/excom/mandates/${mandateId}/members/${memberId}`, {
+    method: "DELETE",
+  })
+
+  return response.json()
+}

@@ -181,62 +181,6 @@ export const homeImages = {
   ],
 } as const
 
-// Committee images configuration
-export const committeeImages = {
-  // Committee member photos - Updated with actual WIE ISIMM committee members
-  members: [
-    {
-      name: "Dorra Barbria",
-      position: "Chairwoman",
-      image: "/images/committee/dorra_barbria.png", 
-      facebook: "https://facebook.com/dorra.barbria",
-      email: "dbarbria@gmail.com",
-      linkedin: "https://www.linkedin.com/in/dorra-barbria-254947280/",
-    },
-    {
-      name: "Chifa Guesmi",
-      position: "Vice Chair",
-      image: "/images/committee/chifa_guesmi.jpeg", 
-      facebook: "https://www.facebook.com/chifa.guesmy",
-      email: "chifaguesmi@ieee.org",
-      linkedin: "https://www.linkedin.com/in/chifa-guesmi-7ab213284/",
-    },
-    {
-      name: "Maryem Teborbi",
-      position: "Secretary",
-      image: "/images/committee/maryem_teborbi.png", 
-      facebook: "https://www.facebook.com/maryem.teborbi",
-      email: "maryemteborbi0@ieee.org",
-      linkedin: "https://www.linkedin.com/in/maryem-teborbi-a06b79300/",
-    },
-    {
-      name: "Miniar Guizani",
-      position: "Treasurer",
-      image: "/images/committee/miniar_guizani.png", 
-      facebook: "https://www.facebook.com/miniar.guizani",
-      email: "miniarguizeni@gmail.com",
-      linkedin: "https://www.linkedin.com/in/miniar-guizeni-5b1841377/",
-    },
-    {
-      name: "Malek Aarfaoui",
-      position: "Webmaster",
-      image: "/images/committee/malek_aarfaoui.png", 
-      facebook: "https://www.facebook.com/malek.arfaoui.792",
-      email: "arfaoui.malek04@icloud.com",
-      linkedin: "https://www.linkedin.com/in/arfaoui-malek-9518652a1/",
-    },
-  ],
-  
-  // Chairwoman photo for leadership message section
-  chair: {
-    src: "/images/committee/dorra_barbria.png", 
-    alt: "Dorra Barbria - Chairwoman",
-    width: 80,
-    height: 80,
-    className: "w-16 h-16 rounded-full object-cover mr-4",
-  },
-} as const
-
 // Helper function to get gallery images (with fallback to placeholders)
 export const getGalleryImages = () => {
   return aboutImages.gallery.map((image, index) => ({
@@ -252,14 +196,5 @@ export const getRecentEventsImages = () => {
     ...image,
     // Fallback to placeholder if image doesn't exist
     src: image.src.startsWith('/placeholder') ? image.src : image.src,
-  }))
-}
-
-// Helper function to get committee members with fallback images
-export const getCommitteeMembers = () => {
-  return committeeImages.members.map((member, index) => ({
-    ...member,
-    // Fallback to placeholder if image doesn't exist
-    image: member.image.startsWith('/placeholder') ? member.image : member.image,
   }))
 }

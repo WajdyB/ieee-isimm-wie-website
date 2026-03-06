@@ -1,31 +1,88 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Facebook, Mail, Linkedin } from "lucide-react"
-import { getCommitteeMembers, committeeImages } from "@/lib/images"
+
+interface ExcomMember {
+  _id?: string
+  name: string
+  position: string
+  image?: string
+  facebook?: string
+  email?: string
+  linkedin?: string
+  rank?: number | null
+}
+
+interface ExcomMandate {
+  _id: string
+  name: string
+  startYear?: number | null
+  endYear?: number | null
+  isCurrent?: boolean
+  members?: ExcomMember[]
+}
 
 export default function CommitteePage() {
   const observerRef = useRef<IntersectionObserver | null>(null)
-  const committeeMembers = getCommitteeMembers()
+  const [mandates, setMandates] = useState<ExcomMandate[]>([])
+  const [selectedMandateId, setSelectedMandateId] = useState<string>("")
+
+  const selectedMandate = mandates.find((m) => m._id === selectedMandateId)
+  const members = selectedMandate?.members ?? []
+
+  const sortedMembers = [...members].sort(
+    (a, b) => (a.rank ?? Number.MAX_SAFE_INTEGER) - (b.rank ?? Number.MAX_SAFE_INTEGER),
+  )
+
+  const chairMember =
+    sortedMembers.find((member) => member.position.toLowerCase().includes("chair")) ?? sortedMembers[0]
 
   useEffect(() => {
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("visible")
+    // Small delay to ensure the DOM has updated with new members
+    const timeoutId = setTimeout(() => {
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("visible")
+            }
+          })
+        },
+        { threshold: 0.1 },
+      )
+
+      const elements = document.querySelectorAll(".animate-on-scroll")
+      elements.forEach((el) => observerRef.current?.observe(el))
+    }, 100)
+
+    return () => {
+      clearTimeout(timeoutId)
+      observerRef.current?.disconnect()
+    }
+  }, [sortedMembers])
+
+  useEffect(() => {
+    const loadMandates = async () => {
+      try {
+        const response = await fetch("/api/excom/mandates")
+        const data = await response.json()
+        if (data.success && Array.isArray(data.data)) {
+          setMandates(data.data)
+          const current =
+            data.data.find((m: ExcomMandate) => m.isCurrent) ?? data.data[0] ?? null
+          if (current) {
+            setSelectedMandateId(current._id)
           }
-        })
-      },
-      { threshold: 0.1 },
-    )
+        }
+      } catch (error) {
+        console.error("Failed to load executive committee mandates:", error)
+      }
+    }
 
-    const elements = document.querySelectorAll(".animate-on-scroll")
-    elements.forEach((el) => observerRef.current?.observe(el))
-
-    return () => observerRef.current?.disconnect()
+    loadMandates()
   }, [])
 
   return (
@@ -48,8 +105,35 @@ export default function CommitteePage() {
       {/* Committee Members */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
+          {mandates.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-3 mb-10">
+              {mandates.map((mandate) => (
+                <button
+                  key={mandate._id}
+                  type="button"
+                  onClick={() => setSelectedMandateId(mandate._id)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
+                    selectedMandateId === mandate._id
+                      ? "bg-purple-600 text-white border-purple-600"
+                      : "bg-white text-purple-600 border-purple-200 hover:bg-purple-50"
+                  }`}
+                >
+                  {mandate.name}
+                  {mandate.isCurrent ? " (current)" : ""}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {selectedMandate && (
+            <p className="text-center text-gray-500 mb-6">
+              Showing team for mandate{" "}
+              <span className="font-semibold text-purple-600">{selectedMandate.name}</span>
+            </p>
+          )}
+
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {committeeMembers.map((member, index) => (
+            {sortedMembers.map((member, index) => (
               <div
                 key={index}
                 className="bg-white rounded-xl shadow-lg overflow-hidden group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 animate-on-scroll"
@@ -65,7 +149,7 @@ export default function CommitteePage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-purple-600/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div className="absolute bottom-4 left-4 right-4 flex justify-center space-x-4">
                       <Link
-                        href={member.facebook}
+                        href={member.facebook || "#"}
                         target="_blank"
                         className="bg-white/20 backdrop-blur-sm p-2 rounded-full hover:bg-white/30 transition-colors duration-200"
                       >
@@ -78,7 +162,7 @@ export default function CommitteePage() {
                         <Mail className="h-5 w-5 text-white" />
                       </Link>
                       <Link
-                        href={member.linkedin}
+                        href={member.linkedin || "#"}
                         target="_blank"
                         className="bg-white/20 backdrop-blur-sm p-2 rounded-full hover:bg-white/30 transition-colors duration-200"
                       >
@@ -89,14 +173,14 @@ export default function CommitteePage() {
                 </div>
                 <div className="p-6 text-center">
                   <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors duration-200">
-                    <Link href={member.facebook} target="_blank">
+                    <Link href={member.facebook || "#"} target="_blank">
                       {member.name}
                     </Link>
                   </h3>
                   <p className="text-purple-600 font-medium mb-4">{member.position}</p>
                   <div className="flex justify-center space-x-3">
                     <Link
-                      href={member.facebook}
+                      href={member.facebook || "#"}
                       target="_blank"
                       className="text-gray-400 hover:text-purple-600 transition-colors duration-200"
                     >
@@ -109,7 +193,7 @@ export default function CommitteePage() {
                       <Mail className="h-5 w-5" />
                     </Link>
                     <Link
-                      href={member.linkedin}
+                      href={member.linkedin || "#"}
                       target="_blank"
                       className="text-gray-400 hover:text-purple-600 transition-colors duration-200"
                     >
@@ -135,17 +219,26 @@ export default function CommitteePage() {
                 stronger, more equitable future for all engineers."
               </p>
               <div className="flex items-center justify-center">
-                <Image
-                  src={committeeImages.chair.src}
-                  alt={committeeImages.chair.alt}
-                  width={committeeImages.chair.width}
-                  height={committeeImages.chair.height}
-                  className={committeeImages.chair.className}
-                />
-                <div className="text-left">
-                  <p className="font-semibold text-gray-900">Dorra Barbria</p>
-                  <p className="text-purple-600">Chairwoman, WIE ISIMM</p>
-                </div>
+                {chairMember ? (
+                  <>
+                    <Image
+                      src={chairMember.image || "/placeholder.svg"}
+                      alt={chairMember.name}
+                      width={80}
+                      height={80}
+                      className="w-16 h-16 rounded-full object-cover mr-4"
+                    />
+                    <div className="text-left">
+                      <p className="font-semibold text-gray-900">{chairMember.name}</p>
+                      <p className="text-purple-600">{chairMember.position}</p>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center">
+                    <p className="font-semibold text-gray-900">Executive Committee</p>
+                    <p className="text-purple-600">WIE ISIMM</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
