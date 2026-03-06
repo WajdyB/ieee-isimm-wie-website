@@ -32,6 +32,7 @@ import {
   deleteExcomMember,
   type EventData,
   type ExcomMandate,
+  type ExcomMember,
   type ExcomMemberData,
 } from "@/lib/api"
 
@@ -49,7 +50,7 @@ interface Event {
 }
 
 interface ExcomMandateWithMembers extends ExcomMandate {
-  members: ExcomMemberData[]
+  members: ExcomMember[]
 }
 
 interface FeedbackDialogState {
@@ -320,7 +321,7 @@ export default function AdminPage() {
       const response = await addExcomMember(selectedMandateId, newMember)
 
       if (response.success) {
-        const createdMember = response.data as ExcomMemberData
+        const createdMember = response.data as ExcomMember
         setExcomMandates(
           excomMandates.map((mandate) =>
             mandate._id === selectedMandateId
@@ -479,11 +480,11 @@ export default function AdminPage() {
         facebook: editMember.facebook,
         email: editMember.email,
         linkedin: editMember.linkedin,
-        rank: editMember.rank ?? null,
+        rank: editMember.rank ?? undefined,
       })
 
       if (response.success) {
-        const updated = response.data as ExcomMemberData
+        const updated = response.data as ExcomMember
         setExcomMandates((prev) =>
           prev.map((mandate) =>
             mandate._id === editMember.mandateId

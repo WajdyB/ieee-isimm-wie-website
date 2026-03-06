@@ -16,9 +16,9 @@ interface UpdateMemberBody {
 
 export async function PATCH(
   req: NextRequest,
-  context: { params: { mandateId: string; memberId: string } },
+  context: { params: Promise<{ mandateId: string; memberId: string }> },
 ) {
-  const { mandateId, memberId } = context.params
+  const { mandateId, memberId } = await context.params
 
   if (!mandateId || !memberId) {
     return NextResponse.json(
@@ -111,9 +111,9 @@ export async function PATCH(
 
 export async function DELETE(
   _req: NextRequest,
-  context: { params: { mandateId: string; memberId: string } },
+  context: { params: Promise<{ mandateId: string; memberId: string }> },
 ) {
-  const { mandateId, memberId } = context.params
+  const { mandateId, memberId } = await context.params
 
   if (!mandateId || !memberId) {
     return NextResponse.json(
@@ -142,10 +142,11 @@ export async function DELETE(
 
     const result = await collection.updateOne(
       { _id: mandateObjectId },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       {
         $pull: { members: { _id: memberObjectId } },
         $set: { updated_at: now },
-      },
+      } as any,
     )
 
     if (result.matchedCount === 0) {
