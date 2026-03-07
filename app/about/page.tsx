@@ -345,22 +345,32 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Call to Action */}
+      {/* Discover WIE World */}
       <section className="py-20 bg-gradient-to-br from-[#1e1b2e] via-[#2a1f3d] to-[#1e1b2e] text-white relative overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center animate-on-scroll">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">Join Our Community</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">Discover the WIE World</h2>
             <p className="text-xl mb-8 opacity-90 leading-relaxed">
-              Be part of a supportive network of women engineers who are making a difference. Together, we can break
-              barriers and create opportunities for the next generation.
+              One global mission, countless stories of impact: IEEE WIE connects, inspires, and empowers women in
+              engineering and technology across every stage of their journey.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-white text-[#8b5cf6] px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200">
-                Get Involved
-              </button>
-              <button className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white/10 transition-colors duration-200">
-                Contact Us
-              </button>
+              <a
+                href="https://wie.ieee.tn/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white text-[#8b5cf6] px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200"
+              >
+                Explore WIE Tunisia
+              </a>
+              <a
+                href="https://wie.ieee.org/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white/10 transition-colors duration-200"
+              >
+                Visit IEEE WIE Global
+              </a>
             </div>
           </div>
         </div>

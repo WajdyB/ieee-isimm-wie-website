@@ -248,18 +248,23 @@ export default function CommitteePage() {
         </div>
       </section>
 
-      {/* Call to Action */}
+      {/* Join Our Community */}
       <section className="py-20 bg-gradient-to-br from-[#1e1b2e] via-[#2a1f3d] to-[#1e1b2e] text-white relative overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center animate-on-scroll">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">Want to Get Involved?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">Join Our Community</h2>
             <p className="text-xl mb-8 opacity-90 leading-relaxed">
               Join our team and help us make a difference in the engineering community. We're always looking for
               passionate individuals to contribute to our mission.
             </p>
-            <button className="bg-white text-[#8b5cf6] px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200">
+            <a
+              href="https://docs.google.com/forms/d/e/1FAIpQLScvreecwO6G45wkMLpJC8nUyoMQxVLvBkvQSDyO_2X85Lp6kA/viewform"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-white text-[#8b5cf6] px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200"
+            >
               Contact Us
-            </button>
+            </a>
           </div>
         </div>
       </section>

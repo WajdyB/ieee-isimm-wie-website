@@ -53,7 +53,9 @@ export default function ProjectsPage() {
       <section className="bg-gradient-to-br from-[#1a1625] via-[#0f111a] to-[#0a0d15] py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">Projects</h1>
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+              Our <span className="text-primary">Projects</span>
+            </h1>
             <p className="text-lg text-gray-300 leading-relaxed">
               Discover impactful initiatives developed by WIE ISIMM, from digital platforms to community-focused innovations.
             </p>
