@@ -22,7 +22,7 @@ const Footer = () => {
       name: "Email",
       href: "mailto:contact@wie-isimm.org",
       icon: Mail,
-      color: "hover:text-purple-600",
+      color: "hover:text-primary",
     },
   ]
 
@@ -34,13 +34,15 @@ const Footer = () => {
   ]
 
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className="bg-[#0d1117] border-t border-[#1f2937]/60 text-white">
       <div className="container mx-auto px-4 py-12">
         <div className="grid md:grid-cols-4 gap-8">
           {/* Logo and Description */}
           <div className="md:col-span-2">
             <div className="flex items-center mb-4">
-              <Logo type="wie" className="h-12 w-auto" />
+              <Link href="/" aria-label="Go to homepage">
+                <Logo type="wie" className="h-12 w-auto" />
+              </Link>
             </div>
             <p className="text-gray-300 mb-6 leading-relaxed">
               Women in Engineering Affinity Group of IEEE ISIMM Student Branch. Empowering women in engineering 
@@ -64,13 +66,13 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-purple-400">Quick Links</h3>
+            <h3 className="text-lg font-semibold mb-4 text-primary">Quick Links</h3>
             <ul className="space-y-2">
               {quickLinks.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-gray-300 hover:text-purple-400 transition-colors duration-200"
+                    className="text-gray-300 hover:text-primary transition-colors duration-200"
                   >
                     {link.name}
                   </Link>
@@ -81,14 +83,14 @@ const Footer = () => {
 
           {/* Contact Info */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-purple-400">Contact</h3>
+            <h3 className="text-lg font-semibold mb-4 text-primary">Contact</h3>
             <div className="space-y-2 text-gray-300">
               <p>IEEE ISIMM Student Branch</p>
               <p>Monastir, Tunisia</p>
               <p>
                 <Link
                   href="mailto:contact@wie-isimm.org"
-                  className="hover:text-purple-400 transition-colors duration-200"
+                  className="hover:text-primary transition-colors duration-200"
                 >
                   contact@wie-isimm.org
                 </Link>
@@ -106,7 +108,14 @@ const Footer = () => {
             <div className="flex items-center mt-4 md:mt-0">
               <span className="text-gray-400 text-sm mr-2">Powered by</span>
               <div className="flex items-center">
-                <Logo type="ieee" className="h-6 w-auto" />
+                <Link
+                  href="https://isimm.ieee.tn/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Visit IEEE ISIMM Student Branch website"
+                >
+                  <Logo type="ieee" className="h-6 w-auto" />
+                </Link>
               </div>
             </div>
           </div>

@@ -23,6 +23,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const eventData = await request.json()
+    const eventType = eventData.eventType === "upcoming" ? "upcoming" : "previous"
 
     // Validate required fields
     if (!eventData.title || !eventData.description || !eventData.date || !eventData.location) {
@@ -32,15 +33,28 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (eventType === "upcoming" && (!eventData.registrationLink || !eventData.picture)) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Upcoming events require both a picture and registration link',
+        },
+        { status: 400 }
+      )
+    }
+
     const db = await getDb()
     const now = new Date()
     const event = {
+      eventType,
       title: eventData.title,
       description: eventData.description,
       date: eventData.date,
       location: eventData.location,
-      attendees: eventData.attendees || 0,
-      images: eventData.images || [],
+      attendees: eventType === "previous" ? eventData.attendees || 0 : 0,
+      registrationLink: eventType === "upcoming" ? eventData.registrationLink : "",
+      picture: eventType === "upcoming" ? eventData.picture : "",
+      images: eventType === "previous" ? eventData.images || [] : [],
       created_at: now,
       updated_at: now
     }

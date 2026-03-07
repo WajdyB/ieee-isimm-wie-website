@@ -4,10 +4,10 @@ import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { ArrowRight, Users, Calendar, Award, Loader2 } from "lucide-react"
+import { ArrowRight, Loader2 } from "lucide-react"
 
 interface Event {
-  id: number
+  _id: string
   title: string
   description: string
   date: string
@@ -74,20 +74,20 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-purple-50 to-white py-20 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-[#1a1625] via-[#0f111a] to-[#0a0d15] py-20 overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="animate-slide-in-left">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-                Empowering <span className="text-purple-600">Women</span> in Engineering
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+                Empowering <span className="text-primary">Women</span> in Engineering
               </h1>
-              <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed">
+              <p className="text-lg md:text-xl text-gray-300 mb-8 leading-relaxed">
                 Welcome to the Women in Engineering Affinity Group of IEEE ISIMM Student Branch. We are dedicated to
                 inspiring, engaging, encouraging, and empowering women in engineering and technology fields through
                 professional development, networking, and mentorship opportunities.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button asChild size="lg" className="bg-purple-600 hover:bg-purple-700">
+                <Button asChild size="lg" className="bg-primary hover:bg-primary/90">
                   <Link href="/about">
                     Learn More <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
@@ -99,7 +99,8 @@ export default function HomePage() {
             </div>
             <div className="animate-slide-in-right">
               <div className="relative">
-                <div className="absolute inset-0 bg-purple-200 rounded-3xl transform rotate-6"></div>
+                <div className="absolute -inset-3 bg-[#c4b5fd]/55 rounded-3xl transform rotate-6"></div>
+                <div className="absolute -inset-1 bg-[#e2e8f0]/70 rounded-3xl transform -rotate-3"></div>
                 <Image
                   src="/images/home/hero-image.png"
                   alt="WIE ISIMM Members"
@@ -114,37 +115,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-3 gap-8 animate-on-scroll">
-            <div className="text-center group">
-              <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200 transition-colors duration-300">
-                <Users className="h-8 w-8 text-purple-600" />
-              </div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-2">50+</h3>
-              <p className="text-gray-600">Active Members</p>
-            </div>
-            <div className="text-center group">
-              <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200 transition-colors duration-300">
-                <Calendar className="h-8 w-8 text-purple-600" />
-              </div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-2">25+</h3>
-              <p className="text-gray-600">Events Organized</p>
-            </div>
-            <div className="text-center group">
-              <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200 transition-colors duration-300">
-                <Award className="h-8 w-8 text-purple-600" />
-              </div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-2">10+</h3>
-              <p className="text-gray-600">Awards Won</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Mission Preview */}
-      <section className="py-20 bg-gradient-to-r from-purple-600 to-purple-800 text-white">
+      <section className="py-20 bg-gradient-to-br from-[#1e1b2e] via-[#2a1f3d] to-[#1e1b2e] text-white relative overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center animate-on-scroll">
             <h2 className="text-3xl md:text-4xl font-bold mb-6">Our Mission</h2>
@@ -162,11 +134,11 @@ export default function HomePage() {
       </section>
 
       {/* Recent Events Preview */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-[#0f111a]">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12 animate-on-scroll">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Recent Events</h2>
-            <p className="text-xl text-gray-600">Stay updated with our latest activities and achievements</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Recent Events</h2>
+            <p className="text-xl text-gray-300">Stay updated with our latest activities and achievements</p>
           </div>
           <div className="flex flex-wrap gap-8 justify-center">
             {loading ? (
@@ -174,27 +146,26 @@ export default function HomePage() {
               Array.from({ length: 3 }).map((_, index) => (
                 <div
                   key={index}
-                  className="w-full max-w-sm bg-white rounded-xl shadow-lg overflow-hidden animate-pulse"
+                  className="w-full max-w-sm bg-card rounded-xl shadow-lg overflow-hidden animate-pulse"
                 >
-                  <div className="h-48 bg-gray-200"></div>
+                  <div className="h-48 bg-gray-700"></div>
                   <div className="p-6">
-                    <div className="h-6 bg-gray-200 rounded mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded mb-4"></div>
-                    <div className="h-8 bg-gray-200 rounded w-24"></div>
+                    <div className="h-6 bg-gray-700 rounded mb-2"></div>
+                    <div className="h-4 bg-gray-700 rounded mb-4"></div>
+                    <div className="h-8 bg-gray-700 rounded w-24"></div>
                   </div>
                 </div>
               ))
             ) : recentEvents.length > 0 ? (
               recentEvents.map((event, index) => (
                 <div
-                  key={event.id}
-                  className="w-full max-w-sm bg-white rounded-xl shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300 animate-on-scroll"
+                  key={event._id ?? `${event.title}-${index}`}
+                  className="w-full max-w-sm bg-card rounded-xl shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300 animate-on-scroll border border-border"
                   style={{ 
                     display: 'block', 
                     visibility: 'visible', 
                     opacity: 1,
-                    position: 'relative',
-                    zIndex: 1000
+                    position: 'relative'
                   }}
                 >
                   <div className="relative overflow-hidden">
@@ -205,14 +176,14 @@ export default function HomePage() {
                       height={300}
                       className="w-full h-48 object-contain group-hover:scale-105 transition-transform duration-300"
                     />
-                    <div className="absolute inset-0 bg-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </div>
                   <div className="p-6">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">{event.title}</h3>
-                    <p className="text-gray-600 mb-2 text-sm">
+                    <h3 className="text-xl font-semibold text-white mb-2">{event.title}</h3>
+                    <p className="text-gray-300 mb-2 text-sm">
                       {formatDate(event.date)} • {event.location}
                     </p>
-                    <p className="text-gray-600 mb-4 line-clamp-2">
+                    <p className="text-gray-300 mb-4 line-clamp-2">
                       {event.description}
                     </p>
                     <Button variant="outline" size="sm">
@@ -224,7 +195,7 @@ export default function HomePage() {
             ) : (
               // No events state
               <div className="w-full text-center py-12">
-                <p className="text-gray-500 text-lg">No recent events found</p>
+                <p className="text-gray-400 text-lg">No recent events found</p>
               </div>
             )}
           </div>

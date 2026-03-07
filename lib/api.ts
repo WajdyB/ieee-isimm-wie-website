@@ -6,12 +6,29 @@ export interface LoginCredentials {
 }
 
 export interface EventData {
+  eventType: "upcoming" | "previous"
   title: string
   description: string
   date: string
   location: string
   attendees?: number
+  registrationLink?: string
+  picture?: string
   images?: string[] // URLs returned from /api/upload, now served from MongoDB GridFS
+}
+
+export interface ProjectData {
+  title: string
+  description: string
+  technologies: string[]
+  link: string
+  picture?: string
+}
+
+export interface Project extends ProjectData {
+  _id: string
+  created_at?: string
+  updated_at?: string
 }
 
 export interface ExcomMemberData {
@@ -102,7 +119,45 @@ export async function deleteEvent(id: string) {
   })
 
   return response.json()
-} 
+}
+
+// Projects API
+export async function getProjects() {
+  const response = await fetch('/api/projects')
+  return response.json()
+}
+
+export async function createProject(projectData: ProjectData) {
+  const response = await fetch('/api/projects', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(projectData),
+  })
+
+  return response.json()
+}
+
+export async function deleteProject(id: string) {
+  const response = await fetch(`/api/projects/${id}`, {
+    method: 'DELETE',
+  })
+
+  return response.json()
+}
+
+export async function updateProject(id: string, updates: Partial<ProjectData>) {
+  const response = await fetch(`/api/projects/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(updates),
+  })
+
+  return response.json()
+}
 
 // Executive Committee API
 export async function getExcomMandates() {
@@ -189,5 +244,37 @@ export async function deleteExcomMember(mandateId: string, memberId: string) {
     method: "DELETE",
   })
 
+  return response.json()
+}
+
+// Messages API
+export interface Message {
+  _id: string
+  email: string
+  message: string
+  read: boolean
+  createdAt: string
+}
+
+export async function getMessages() {
+  const response = await fetch('/api/messages')
+  return response.json()
+}
+
+export async function markMessageAsRead(id: string, read: boolean = true) {
+  const response = await fetch('/api/messages', {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ id, read }),
+  })
+  return response.json()
+}
+
+export async function deleteMessage(id: string) {
+  const response = await fetch(`/api/messages?id=${id}`, {
+    method: 'DELETE',
+  })
   return response.json()
 }

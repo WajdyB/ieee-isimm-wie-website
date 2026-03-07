@@ -4,6 +4,8 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
+import ScrollToTop from "@/components/scroll-to-top"
+import HelpAssistant from "@/components/help-assistant"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -22,10 +24,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.className} bg-black text-white`}>
         <Header />
         <main className="pt-20">{children}</main>
         <Footer />
+        <ScrollToTop />
+        <HelpAssistant />
       </body>
     </html>
   )

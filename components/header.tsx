@@ -14,15 +14,18 @@ const Header = () => {
     { name: "About Us", href: "/about" },
     { name: "Executive Committee", href: "/committee" },
     { name: "Events", href: "/events" },
+    { name: "Projects", href: "/projects" },
   ]
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-purple-100 shadow-sm">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-[#0d1117]/95 backdrop-blur-md border-b border-[#1f2937]/60 shadow-lg">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           {/* WIE Logo */}
           <div className="flex items-center">
-            <Logo type="wie" />
+            <Link href="/" aria-label="Go to homepage">
+              <Logo type="wie" />
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
@@ -31,17 +34,24 @@ const Header = () => {
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-gray-700 hover:text-purple-600 font-medium transition-colors duration-200 relative group"
+                className="text-gray-200 hover:text-primary font-medium transition-colors duration-200 relative group"
               >
                 {item.name}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-purple-600 transition-all duration-200 group-hover:w-full"></span>
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-full"></span>
               </Link>
             ))}
           </nav>
 
           {/* IEEE Tunisia Section Logo */}
           <div className="hidden md:flex items-center">
-            <Logo type="ieee" />
+            <Link
+              href="https://isimm.ieee.tn/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Visit IEEE ISIMM Student Branch website"
+            >
+              <Logo type="ieee" className="h-[5rem] w-auto" />
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -52,21 +62,28 @@ const Header = () => {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <nav className="md:hidden mt-4 pb-4 border-t border-purple-100">
+          <nav className="md:hidden mt-4 pb-4 border-t border-[#1f2937]/60">
             <div className="flex flex-col space-y-3 pt-4">
               {navItems.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="text-gray-700 hover:text-purple-600 font-medium transition-colors duration-200 py-2"
+                  className="text-gray-200 hover:text-primary font-medium transition-colors duration-200 py-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}
                 </Link>
               ))}
             </div>
-            <div className="flex justify-center mt-4 pt-4 border-t border-purple-100">
-              <Logo type="ieeeMobile" />
+            <div className="flex justify-center mt-4 pt-4 border-t border-[#1f2937]/60">
+              <Link
+                href="https://isimm.ieee.tn/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Visit IEEE ISIMM Student Branch website"
+              >
+                <Logo type="ieeeMobile" className="h-16 w-auto" />
+              </Link>
             </div>
           </nav>
         )}

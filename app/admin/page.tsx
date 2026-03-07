@@ -15,7 +15,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"
-import { Plus, Trash2, Upload, Eye, EyeOff, Loader2, Edit } from "lucide-react"
+import { Plus, Trash2, Upload, Eye, EyeOff, Loader2, Edit, Mail, MailOpen } from "lucide-react"
 import Image from "next/image"
 import {
   loginAdmin,
@@ -34,16 +34,29 @@ import {
   type ExcomMandate,
   type ExcomMember,
   type ExcomMemberData,
+  getMessages,
+  markMessageAsRead,
+  deleteMessage,
+  type Message,
+  getProjects,
+  createProject,
+  deleteProject,
+  updateProject,
+  type Project,
+  type ProjectData,
 } from "@/lib/api"
 
 // Add local Event type for MongoDB
 interface Event {
   _id: string
+  eventType?: "upcoming" | "previous"
   title: string
   description: string
   date: string
   location: string
   attendees: number
+  registrationLink?: string
+  picture?: string
   images: string[]
   created_at: string
   updated_at: string
@@ -81,6 +94,16 @@ interface EditMemberState {
   rank?: number | null
 }
 
+interface EditProjectState {
+  open: boolean
+  id: string | null
+  title: string
+  description: string
+  link: string
+  technologiesInput: string
+  picture: string
+}
+
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [email, setEmail] = useState("")
@@ -89,11 +112,14 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false)
   const [events, setEvents] = useState<Event[]>([])
   const [newEvent, setNewEvent] = useState<EventData>({
+    eventType: "previous",
     title: "",
     description: "",
     date: "",
     location: "",
     attendees: 0,
+    registrationLink: "",
+    picture: "",
     images: [],
   })
 
@@ -156,6 +182,28 @@ export default function AdminPage() {
     rank: undefined,
   })
 
+  const [messages, setMessages] = useState<Message[]>([])
+  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null)
+  const [messageDialogOpen, setMessageDialogOpen] = useState(false)
+  const [projects, setProjects] = useState<Project[]>([])
+  const [newProject, setNewProject] = useState<ProjectData>({
+    title: "",
+    description: "",
+    technologies: [],
+    link: "",
+    picture: "",
+  })
+  const [technologiesInput, setTechnologiesInput] = useState("")
+  const [editProject, setEditProject] = useState<EditProjectState>({
+    open: false,
+    id: null,
+    title: "",
+    description: "",
+    link: "",
+    technologiesInput: "",
+    picture: "",
+  })
+
   const showFeedback = (title: string, message: string) => {
     setFeedbackDialog({ open: true, title, message })
   }
@@ -165,6 +213,8 @@ export default function AdminPage() {
     if (isAuthenticated) {
       loadEvents()
       loadExcomMandates()
+      loadMessages()
+      loadProjects()
     }
   }, [isAuthenticated])
 
@@ -206,6 +256,197 @@ export default function AdminPage() {
     }
   }
 
+  const loadMessages = async () => {
+    try {
+      const response = await getMessages()
+      if (response.success) {
+        setMessages(response.data)
+      } else {
+        console.error("Failed to load messages:", response.message)
+      }
+    } catch (error) {
+      console.error("Error loading messages:", error)
+    }
+  }
+
+  const handleViewMessage = async (message: Message) => {
+    setSelectedMessage(message)
+    setMessageDialogOpen(true)
+
+    // Mark as read if not already
+    if (!message.read) {
+      try {
+        await markMessageAsRead(message._id, true)
+        setMessages(messages.map((m) => (m._id === message._id ? { ...m, read: true } : m)))
+      } catch (error) {
+        console.error("Error marking message as read:", error)
+      }
+    }
+  }
+
+  const handleDeleteMessage = async (id: string) => {
+    try {
+      setLoading(true)
+      const response = await deleteMessage(id)
+
+      if (response.success) {
+        setMessages(messages.filter((m) => m._id !== id))
+        showFeedback("Message deleted", "The message has been deleted successfully.")
+      } else {
+        showFeedback("Delete failed", response.message || "Failed to delete message.")
+      }
+    } catch (error) {
+      console.error("Error deleting message:", error)
+      showFeedback("Delete failed", "Failed to delete message. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const loadProjects = async () => {
+    try {
+      const response = await getProjects()
+      if (response.success) {
+        setProjects(response.data)
+      } else {
+        console.error("Failed to load projects:", response.message)
+      }
+    } catch (error) {
+      console.error("Error loading projects:", error)
+    }
+  }
+
+  const handleAddProject = async () => {
+    if (!newProject.title || !newProject.description || !newProject.link) {
+      showFeedback("Missing information", "Please fill in title, description, and project link.")
+      return
+    }
+
+    const technologies = technologiesInput
+      .split(",")
+      .map((tech) => tech.trim())
+      .filter((tech) => tech.length > 0)
+
+    try {
+      setLoading(true)
+      const response = await createProject({
+        ...newProject,
+        technologies,
+      })
+
+      if (response.success) {
+        setProjects([response.data, ...projects])
+        setNewProject({
+          title: "",
+          description: "",
+          technologies: [],
+          link: "",
+          picture: "",
+        })
+        setTechnologiesInput("")
+        showFeedback("Project created", "The project has been added successfully.")
+      } else {
+        showFeedback("Project not created", response.message || "Failed to create project.")
+      }
+    } catch (error) {
+      console.error("Error creating project:", error)
+      showFeedback("Project not created", "Failed to create project. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDeleteProject = async (id: string) => {
+    try {
+      setLoading(true)
+      const response = await deleteProject(id)
+      if (response.success) {
+        setProjects(projects.filter((project) => project._id !== id))
+        showFeedback("Project deleted", "The project has been deleted successfully.")
+      } else {
+        showFeedback("Project not deleted", response.message || "Failed to delete project.")
+      }
+    } catch (error) {
+      console.error("Error deleting project:", error)
+      showFeedback("Project not deleted", "Failed to delete project. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const openEditProject = (project: Project) => {
+    setEditProject({
+      open: true,
+      id: project._id,
+      title: project.title,
+      description: project.description,
+      link: project.link,
+      technologiesInput: (project.technologies || []).join(", "),
+      picture: project.picture || "",
+    })
+  }
+
+  const saveEditProject = async () => {
+    if (!editProject.id) return
+
+    const technologies = editProject.technologiesInput
+      .split(",")
+      .map((tech) => tech.trim())
+      .filter((tech) => tech.length > 0)
+
+    try {
+      setLoading(true)
+      const response = await updateProject(editProject.id, {
+        title: editProject.title,
+        description: editProject.description,
+        link: editProject.link,
+        technologies,
+        picture: editProject.picture,
+      })
+
+      if (response.success) {
+        const updated = response.data as Project
+        setProjects((prev) => prev.map((p) => (p._id === updated._id ? updated : p)))
+        setEditProject((prev) => ({ ...prev, open: false }))
+        showFeedback("Project updated", "The project has been updated successfully.")
+      } else {
+        showFeedback("Project not updated", response.message || "Failed to update project.")
+      }
+    } catch (error) {
+      console.error("Error updating project:", error)
+      showFeedback("Project not updated", "Failed to update project. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleProjectPictureUpload = async (files: FileList | null, mode: "create" | "edit") => {
+    if (!files || files.length === 0) return
+
+    try {
+      setLoading(true)
+      const fileArray = Array.from(files)
+      const uploadResponse = await uploadImages(fileArray)
+
+      if (uploadResponse.success && uploadResponse.files?.length) {
+        const imageUrl = uploadResponse.files[0].url
+        if (mode === "create") {
+          setNewProject((prev) => ({ ...prev, picture: imageUrl }))
+        } else {
+          setEditProject((prev) => ({ ...prev, picture: imageUrl }))
+        }
+        showFeedback("Picture uploaded", "Project picture uploaded successfully.")
+      } else {
+        showFeedback("Upload failed", uploadResponse.message || "Failed to upload project picture.")
+      }
+    } catch (error) {
+      console.error("Error uploading project picture:", error)
+      showFeedback("Upload failed", "Failed to upload project picture. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleLogin = async () => {
     if (!email || !password) {
       showFeedback("Missing information", "Please enter both email and password.")
@@ -234,6 +475,7 @@ export default function AdminPage() {
   const handleLogout = () => {
     setIsAuthenticated(false)
     setEvents([])
+    setProjects([])
     setExcomMandates([])
     setSelectedMandateId("")
   }
@@ -244,6 +486,14 @@ export default function AdminPage() {
       return
     }
 
+    if (newEvent.eventType === "upcoming" && (!newEvent.registrationLink || !newEvent.picture)) {
+      showFeedback(
+        "Missing information",
+        "Upcoming events require both a picture and a registration link.",
+      )
+      return
+    }
+
     try {
       setLoading(true)
       const response = await createEvent(newEvent)
@@ -251,11 +501,14 @@ export default function AdminPage() {
       if (response.success) {
         setEvents([response.data, ...events])
         setNewEvent({
+          eventType: "previous",
           title: "",
           description: "",
           date: "",
           location: "",
           attendees: 0,
+          registrationLink: "",
+          picture: "",
           images: [],
         })
         showFeedback("Event created", "The event has been created successfully.")
@@ -587,9 +840,31 @@ export default function AdminPage() {
     })
   }
 
+  const handleUpcomingPictureUpload = async (files: FileList | null) => {
+    if (!files || files.length === 0) return
+
+    try {
+      setLoading(true)
+      const fileArray = Array.from(files)
+      const uploadResponse = await uploadImages(fileArray)
+
+      if (uploadResponse.success && uploadResponse.files?.length) {
+        const firstUrl = uploadResponse.files[0].url
+        setNewEvent((prev) => ({ ...prev, picture: firstUrl }))
+      } else {
+        showFeedback("Upload failed", uploadResponse.message || "Failed to upload picture.")
+      }
+    } catch (error) {
+      console.error("Error uploading upcoming event picture:", error)
+      showFeedback("Upload failed", "Failed to upload picture. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle>Admin Login</CardTitle>
@@ -642,20 +917,28 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+          <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
           <Button onClick={handleLogout} variant="outline">
             Logout
           </Button>
         </div>
 
         <Tabs defaultValue="events" className="space-y-6">
-          <TabsList>
+          <TabsList className="h-auto flex-wrap gap-1 justify-start">
             <TabsTrigger value="events">Manage Events</TabsTrigger>
             <TabsTrigger value="add-event">Add New Event</TabsTrigger>
+            <TabsTrigger value="projects">Manage Projects</TabsTrigger>
             <TabsTrigger value="excom">Executive Committee</TabsTrigger>
+                      <TabsTrigger value="messages">
+                        Messages {messages.filter((m) => !m.read).length > 0 && (
+                          <span className="ml-2 px-2 py-0.5 bg-primary text-white text-xs rounded-full">
+                            {messages.filter((m) => !m.read).length}
+                          </span>
+                        )}
+                      </TabsTrigger>
           </TabsList>
 
           <TabsContent value="events" className="space-y-6">
@@ -670,11 +953,28 @@ export default function AdminPage() {
                     <div key={event._id} className="border rounded-lg p-4 flex items-center justify-between">
                       <div className="flex-1">
                         <h3 className="font-semibold text-lg">{event.title}</h3>
-                        <p className="text-gray-600 text-sm mb-2">{event.description}</p>
-                        <div className="text-sm text-gray-500">
+                        <p className="text-gray-300 text-sm mb-2">{event.description}</p>
+                        <div className="text-sm text-gray-400 space-y-1">
+                          <div>
+                            <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-primary/20 text-primary mr-2">
+                              {(event.eventType || "previous") === "upcoming" ? "Upcoming" : "Previous"}
+                            </span>
+                          </div>
                           <span>
                             {event.date} • {event.location} • {event.attendees} attendees
                           </span>
+                          {(event.eventType || "previous") === "upcoming" && event.registrationLink ? (
+                            <div>
+                              <a
+                                href={event.registrationLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary hover:underline"
+                              >
+                                Registration link
+                              </a>
+                            </div>
+                          ) : null}
                         </div>
                       </div>
                       <div className="flex space-x-2">
@@ -689,6 +989,235 @@ export default function AdminPage() {
             </Card>
           </TabsContent>
 
+          <TabsContent value="projects" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Add New Project</CardTitle>
+                <CardDescription>Create a project card for the public Projects page</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="project-title">Project Title</Label>
+                  <Input
+                    id="project-title"
+                    value={newProject.title}
+                    onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
+                    placeholder="e.g. WIE ACT 4.0 Website"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="project-description">Short Description</Label>
+                  <Textarea
+                    id="project-description"
+                    value={newProject.description}
+                    onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
+                    placeholder="Write a short summary of the project"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="project-technologies">Technologies Used</Label>
+                  <Input
+                    id="project-technologies"
+                    value={technologiesInput}
+                    onChange={(e) => setTechnologiesInput(e.target.value)}
+                    placeholder="Next.js, TypeScript, Tailwind CSS"
+                  />
+                  <p className="text-xs text-gray-400">Separate technologies with commas.</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="project-link">Project Link</Label>
+                  <Input
+                    id="project-link"
+                    type="url"
+                    value={newProject.link}
+                    onChange={(e) => setNewProject({ ...newProject, link: e.target.value })}
+                    placeholder="https://example.com"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Project Picture</Label>
+                  <div className="flex items-center space-x-2">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        handleProjectPictureUpload(e.target.files, "create")
+                        e.target.value = ""
+                      }}
+                      disabled={loading}
+                      className="flex-1"
+                    />
+                    {loading ? (
+                      <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                    ) : (
+                      <Upload className="h-5 w-5 text-gray-400" />
+                    )}
+                  </div>
+                  {newProject.picture ? (
+                    <div className="mt-2 relative w-36 h-24">
+                      <Image
+                        src={newProject.picture}
+                        alt="Project preview"
+                        fill
+                        className="rounded-md object-cover border"
+                      />
+                      <Button
+                        onClick={() => setNewProject((prev) => ({ ...prev, picture: "" }))}
+                        size="sm"
+                        variant="destructive"
+                        className="absolute -top-2 -right-2 h-6 w-6 p-0"
+                        type="button"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ) : null}
+                </div>
+                <Button onClick={handleAddProject} className="w-full" disabled={loading}>
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                  Add Project
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>All Projects</CardTitle>
+                <CardDescription>Manage projects displayed on the public Projects page</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {projects.length === 0 ? (
+                  <p className="text-gray-400">No projects added yet.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {projects.map((project) => (
+                      <div key={project._id} className="border rounded-lg p-4 flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          {project.picture ? (
+                            <div className="relative w-36 h-24 mb-3">
+                              <Image
+                                src={project.picture}
+                                alt={`${project.title} preview`}
+                                fill
+                                className="rounded-md object-cover border"
+                              />
+                            </div>
+                          ) : null}
+                          <h3 className="font-semibold text-lg text-white">{project.title}</h3>
+                          <p className="text-gray-300 text-sm mt-1 mb-2">{project.description}</p>
+                          <p className="text-xs text-gray-400 mb-2">
+                            Technologies: {project.technologies?.join(", ") || "Not specified"}
+                          </p>
+                          <a
+                            href={project.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary text-sm hover:underline"
+                          >
+                            {project.link}
+                          </a>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            onClick={() => openEditProject(project)}
+                            size="sm"
+                            variant="outline"
+                            disabled={loading}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            onClick={() => handleDeleteProject(project._id)}
+                            size="sm"
+                            variant="destructive"
+                            disabled={loading}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="messages" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Visitor Messages</CardTitle>
+                <CardDescription>
+                  Questions and suggestions from visitors ({messages.length} total, {messages.filter((m) => !m.read).length} unread)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {messages.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Mail className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p>No messages yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {messages.map((msg) => (
+                      <div
+                        key={msg._id}
+                        className={`border rounded-lg p-4 transition-colors ${
+                          msg.read ? "bg-background" : "bg-primary/5 border-primary/30"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2">
+                              {msg.read ? (
+                                <MailOpen className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                              ) : (
+                                <Mail className="w-4 h-4 text-primary flex-shrink-0" />
+                              )}
+                              <a
+                                href={`mailto:${msg.email}`}
+                                className="font-medium text-white hover:text-primary transition-colors truncate"
+                              >
+                                {msg.email}
+                              </a>
+                              <span className="text-xs text-muted-foreground flex-shrink-0">
+                                {new Date(msg.createdAt).toLocaleDateString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-300 line-clamp-2">{msg.message}</p>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewMessage(msg)}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeleteMessage(msg._id)}
+                              disabled={loading}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="add-event">
             <Card>
               <CardHeader>
@@ -696,6 +1225,28 @@ export default function AdminPage() {
                 <CardDescription>Create a new event for the WIE community</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="event-type">Event Type</Label>
+                  <select
+                    id="event-type"
+                    className="w-full border rounded-md px-3 py-2 bg-background"
+                    value={newEvent.eventType}
+                    onChange={(e) =>
+                      setNewEvent((prev) => ({
+                        ...prev,
+                        eventType: e.target.value as "upcoming" | "previous",
+                        // Reset type-specific fields when switching
+                        registrationLink: e.target.value === "upcoming" ? prev.registrationLink || "" : "",
+                        picture: e.target.value === "upcoming" ? prev.picture || "" : "",
+                        attendees: e.target.value === "previous" ? prev.attendees || 0 : 0,
+                        images: e.target.value === "previous" ? prev.images || [] : [],
+                      }))
+                    }
+                  >
+                    <option value="previous">Previous Event</option>
+                    <option value="upcoming">Upcoming Event</option>
+                  </select>
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="title">Title</Label>
                   <Input
@@ -725,67 +1276,123 @@ export default function AdminPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="location">Location</Label>
+                    <Label htmlFor="location">Place</Label>
                     <Input
                       id="location"
                       value={newEvent.location}
                       onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
-                      placeholder="Enter event location"
+                      placeholder="Enter event place"
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="attendees">Number of Attendees</Label>
-                  <Input
-                    id="attendees"
-                    type="number"
-                    value={newEvent.attendees}
-                    onChange={(e) => setNewEvent({ ...newEvent, attendees: Number.parseInt(e.target.value) || 0 })}
-                    placeholder="Enter number of attendees"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Event Images</Label>
-                  <div className="grid grid-cols-3 gap-4 mb-4">
-                    {(newEvent.images || []).map((image, index) => (
-                      <div key={index} className="relative">
-                        <Image
-                          src={image || "/placeholder.svg"}
-                          alt={`New event image ${index + 1}`}
-                          width={200}
-                          height={150}
-                          className="w-full h-24 object-cover rounded"
+                {newEvent.eventType === "upcoming" ? (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="registration-link">Registration Link</Label>
+                      <Input
+                        id="registration-link"
+                        type="url"
+                        value={newEvent.registrationLink || ""}
+                        onChange={(e) => setNewEvent({ ...newEvent, registrationLink: e.target.value })}
+                        placeholder="https://forms.gle/..."
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Picture</Label>
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            handleUpcomingPictureUpload(e.target.files)
+                            e.target.value = ""
+                          }}
+                          className="flex-1"
+                          disabled={loading}
                         />
-                        <Button
-                          onClick={() => removeImage(index)}
-                          size="sm"
-                          variant="destructive"
-                          className="absolute top-1 right-1 h-6 w-6 p-0"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
+                        {loading ? (
+                          <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                        ) : (
+                          <Upload className="h-5 w-5 text-gray-400" />
+                        )}
                       </div>
-                    ))}
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Input
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      onChange={(e) => handleImageUpload(e.target.files)}
-                      className="flex-1"
-                      disabled={loading}
-                    />
-                    {loading ? (
-                      <Loader2 className="h-5 w-5 animate-spin text-purple-600" />
-                    ) : (
-                      <Upload className="h-5 w-5 text-gray-400" />
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-500">
-                    {loading ? 'Uploading images...' : 'Upload multiple images for your event gallery'}
-                  </p>
-                </div>
+                      {newEvent.picture ? (
+                        <div className="relative w-40 h-28 mt-3">
+                          <Image
+                            src={newEvent.picture}
+                            alt="Upcoming event preview"
+                            fill
+                            className="rounded-md object-cover border"
+                          />
+                          <Button
+                            onClick={() => setNewEvent((prev) => ({ ...prev, picture: "" }))}
+                            size="sm"
+                            variant="destructive"
+                            className="absolute -top-2 -right-2 h-6 w-6 p-0"
+                            type="button"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ) : null}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="attendees">Number of Attendees</Label>
+                      <Input
+                        id="attendees"
+                        type="number"
+                        value={newEvent.attendees}
+                        onChange={(e) => setNewEvent({ ...newEvent, attendees: Number.parseInt(e.target.value) || 0 })}
+                        placeholder="Enter number of attendees"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Event Images</Label>
+                      <div className="grid grid-cols-3 gap-4 mb-4">
+                        {(newEvent.images || []).map((image, index) => (
+                          <div key={index} className="relative">
+                            <Image
+                              src={image || "/placeholder.svg"}
+                              alt={`New event image ${index + 1}`}
+                              width={200}
+                              height={150}
+                              className="w-full h-24 object-cover rounded"
+                            />
+                            <Button
+                              onClick={() => removeImage(index)}
+                              size="sm"
+                              variant="destructive"
+                              className="absolute top-1 right-1 h-6 w-6 p-0"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          onChange={(e) => handleImageUpload(e.target.files)}
+                          className="flex-1"
+                          disabled={loading}
+                        />
+                        {loading ? (
+                          <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                        ) : (
+                          <Upload className="h-5 w-5 text-gray-400" />
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-400">
+                        {loading ? 'Uploading images...' : 'Upload multiple images for your event gallery'}
+                      </p>
+                    </div>
+                  </>
+                )}
                 <Button onClick={handleAddEvent} className="w-full">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Event
@@ -859,7 +1466,7 @@ export default function AdminPage() {
                 </Button>
                 {excomMandates.length > 0 && (
                   <div className="pt-6 border-t mt-6 space-y-3">
-                    <h3 className="font-semibold text-sm text-gray-700">Existing mandates</h3>
+                    <h3 className="font-semibold text-sm text-gray-300">Existing mandates</h3>
                     <div className="space-y-2 max-h-60 overflow-y-auto">
                       {excomMandates.map((mandate) => (
                         <div
@@ -870,7 +1477,7 @@ export default function AdminPage() {
                             <p className="font-medium">
                               {mandate.name} {mandate.isCurrent ? "(current)" : ""}
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-gray-400">
                               {mandate.startYear ?? "?"} - {mandate.endYear ?? "?"}
                             </p>
                           </div>
@@ -984,7 +1591,7 @@ export default function AdminPage() {
                             className="flex-1"
                           />
                           {memberImageUploading && (
-                            <Loader2 className="h-5 w-5 animate-spin text-purple-600" />
+                            <Loader2 className="h-5 w-5 animate-spin text-primary" />
                           )}
                         </div>
                         {newMember.image && (
@@ -1068,11 +1675,11 @@ export default function AdminPage() {
                                   className="w-16 h-16 rounded-full object-cover"
                                 />
                               ) : (
-                                <div className="w-16 h-16 rounded-full bg-gray-200" />
+                                <div className="w-16 h-16 rounded-full bg-secondary" />
                               )}
                               <div className="flex-1">
                                 <p className="font-semibold">{member.name}</p>
-                                <p className="text-sm text-gray-600">{member.position}</p>
+                                <p className="text-sm text-gray-300">{member.position}</p>
                                 {member.rank != null && (
                                   <p className="text-xs text-gray-400">Rank: {member.rank}</p>
                                 )}
@@ -1126,6 +1733,157 @@ export default function AdminPage() {
           </DialogHeader>
           <DialogFooter>
             <Button onClick={() => setFeedbackDialog((prev) => ({ ...prev, open: false }))}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={messageDialogOpen} onOpenChange={setMessageDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Message Details</DialogTitle>
+          </DialogHeader>
+          {selectedMessage && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>From</Label>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={`mailto:${selectedMessage.email}`}
+                    className="text-primary hover:underline"
+                  >
+                    {selectedMessage.email}
+                  </a>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      navigator.clipboard.writeText(selectedMessage.email)
+                      showFeedback("Copied", "Email address copied to clipboard")
+                    }}
+                  >
+                    Copy
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Date</Label>
+                <p className="text-sm text-muted-foreground">
+                  {new Date(selectedMessage.createdAt).toLocaleString("en-US", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Message</Label>
+                <div className="p-4 bg-secondary rounded-lg border border-border">
+                  <p className="text-white whitespace-pre-wrap">{selectedMessage.message}</p>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button onClick={() => setMessageDialogOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={editProject.open}
+        onOpenChange={(open) => setEditProject((prev) => ({ ...prev, open }))}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit project</DialogTitle>
+            <DialogDescription>Update project information shown on the public Projects page.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <Label htmlFor="edit-project-title">Project Title</Label>
+              <Input
+                id="edit-project-title"
+                value={editProject.title}
+                onChange={(e) => setEditProject((prev) => ({ ...prev, title: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="edit-project-description">Short Description</Label>
+              <Textarea
+                id="edit-project-description"
+                value={editProject.description}
+                onChange={(e) => setEditProject((prev) => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="edit-project-technologies">Technologies Used</Label>
+              <Input
+                id="edit-project-technologies"
+                value={editProject.technologiesInput}
+                onChange={(e) => setEditProject((prev) => ({ ...prev, technologiesInput: e.target.value }))}
+                placeholder="Next.js, TypeScript, Tailwind CSS"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="edit-project-link">Project Link</Label>
+              <Input
+                id="edit-project-link"
+                type="url"
+                value={editProject.link}
+                onChange={(e) => setEditProject((prev) => ({ ...prev, link: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>Project Picture</Label>
+              <div className="flex items-center space-x-2">
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    handleProjectPictureUpload(e.target.files, "edit")
+                    e.target.value = ""
+                  }}
+                  disabled={loading}
+                  className="flex-1"
+                />
+                {loading ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                ) : (
+                  <Upload className="h-5 w-5 text-gray-400" />
+                )}
+              </div>
+              {editProject.picture ? (
+                <div className="mt-2 relative w-36 h-24">
+                  <Image
+                    src={editProject.picture}
+                    alt="Project preview"
+                    fill
+                    className="rounded-md object-cover border"
+                  />
+                  <Button
+                    onClick={() => setEditProject((prev) => ({ ...prev, picture: "" }))}
+                    size="sm"
+                    variant="destructive"
+                    className="absolute -top-2 -right-2 h-6 w-6 p-0"
+                    type="button"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              ) : null}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditProject((prev) => ({ ...prev, open: false }))}>
+              Cancel
+            </Button>
+            <Button onClick={saveEditProject} disabled={loading}>
+              {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Save
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
